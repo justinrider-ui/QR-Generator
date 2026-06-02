@@ -77,7 +77,7 @@
             justify-content: center;
         }
         
-        canvas {
+        .qr-display img {
             max-width: 100%;
             height: auto;
         }
@@ -142,7 +142,7 @@
         </div>
         
         <div class="qr-display">
-            <canvas id="qrcanvas"></canvas>
+            <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=https://example.com" alt="QR Code">
         </div>
         
         <div class="button-group">
@@ -150,47 +150,30 @@
             <button id="printBtn">Print</button>
         </div>
         
-        <div class="info">Updates as you type • High error correction</div>
+        <div class="info">Updates as you type</div>
     </div>
 
-    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        const canvas = document.getElementById('qrcanvas');
         const urlInput = document.getElementById('urlInput');
+        const qrImage = document.getElementById('qrImage');
         const downloadBtn = document.getElementById('downloadBtn');
         const printBtn = document.getElementById('printBtn');
 
-        function generateQR(url) {
+        function updateQR(url) {
             if (!url.trim()) {
                 return;
             }
-
-            try {
-                QRCode.toCanvas(canvas, url, {
-                    errorCorrectionLevel: 'H',
-                    type: 'image/png',
-                    quality: 0.95,
-                    margin: 1,
-                    width: 256,
-                    color: {
-                        dark: '#000000',
-                        light: '#ffffff'
-                    }
-                }, function (error) {
-                    if (error) console.error(error);
-                });
-            } catch (error) {
-                console.error('QR Error:', error);
-            }
+            const encodedUrl = encodeURIComponent(url);
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodedUrl}`;
         }
 
         urlInput.addEventListener('input', (e) => {
-            generateQR(e.target.value);
+            updateQR(e.target.value);
         });
 
         downloadBtn.addEventListener('click', () => {
             const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
+            link.href = qrImage.src;
             link.download = 'qr-code.png';
             link.click();
         });
@@ -211,7 +194,7 @@
                 </head>
                 <body>
                     <div class="container">
-                        <img src="${canvas.toDataURL('image/png')}" alt="QR Code">
+                        <img src="${qrImage.src}" alt="QR Code">
                         <p>${urlInput.value}</p>
                     </div>
                 </body>
@@ -221,7 +204,7 @@
             setTimeout(() => printWindow.print(), 250);
         });
 
-        generateQR('https://example.com');
+        updateQR('https://example.com');
     </script>
 </body>
 </html>
